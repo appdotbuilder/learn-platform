@@ -32,6 +32,7 @@ import { enrollUserInCourse } from './handlers/enroll_user_in_course';
 import { getUserProgress } from './handlers/get_user_progress';
 import { getUserEnrollments } from './handlers/get_user_enrollments';
 import { getQuizAttempts } from './handlers/get_quiz_attempts';
+import { seedDatabase } from './handlers/seed_database';
 
 const t = initTRPC.create({
   transformer: superjson,
@@ -107,6 +108,10 @@ const appRouter = router({
   getUserEnrollments: publicProcedure
     .input(z.object({ userId: z.number().positive() }))
     .query(({ input }) => getUserEnrollments(input.userId)),
+
+  // Database seeding (for demo/development purposes)
+  seedDatabase: publicProcedure
+    .mutation(() => seedDatabase()),
 });
 
 export type AppRouter = typeof appRouter;

@@ -28,6 +28,7 @@ function App() {
   const [userProgress, setUserProgress] = useState<UserProgress[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showCongratsMessage, setShowCongratsMessage] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
 
   const loadUserData = useCallback(async (userId: number) => {
     try {
@@ -67,12 +68,28 @@ function App() {
           setShowCongratsMessage(true);
           setTimeout(() => setShowCongratsMessage(false), 5000);
         }
+      } else {
+        // userData is null, which means invalid credentials
+        throw new Error('Invalid credentials');
       }
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSeedDatabase = async () => {
+    try {
+      setIsSeeding(true);
+      await trpc.seedDatabase.mutate();
+      alert('Database seeded successfully! You can now login with:\nEmail: demo@example.com\nPassword: password123');
+    } catch (error) {
+      console.error('Database seeding failed:', error);
+      alert('Database seeding failed. Please check the console for details.');
+    } finally {
+      setIsSeeding(false);
     }
   };
 
@@ -171,6 +188,19 @@ function App() {
                 >
                   Register
                 </Button>
+                <div className="pt-4 border-t">
+                  <p className="text-sm text-gray-600 text-center mb-3">
+                    👋 New to the platform? Try our demo!
+                  </p>
+                  <Button 
+                    onClick={handleSeedDatabase}
+                    disabled={isSeeding}
+                    variant="secondary"
+                    className="w-full"
+                  >
+                    {isSeeding ? 'Setting up demo...' : '🚀 Create Demo Account & Course'}
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}

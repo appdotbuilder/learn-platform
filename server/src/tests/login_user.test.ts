@@ -25,12 +25,12 @@ describe('loginUser', () => {
   beforeEach(createDB);
   afterEach(resetDB);
 
-  it('should return user data when email exists', async () => {
-    // Create test user first
+  it('should return user data with correct password', async () => {
+    // Create test user first with demo hash format
     await db.insert(usersTable)
       .values({
         email: testUser.email,
-        password_hash: 'hashed_password',
+        password_hash: 'hashed_testpassword123', // Demo hash format: hashed_ + password
         first_name: testUser.first_name,
         last_name: testUser.last_name,
         avatar_url: testUser.avatar_url
@@ -51,6 +51,60 @@ describe('loginUser', () => {
     expect(result!.last_login).toBeInstanceOf(Date);
   });
 
+  it('should return null for incorrect password', async () => {
+    // Create test user
+    await db.insert(usersTable)
+      .values({
+        email: testUser.email,
+        password_hash: 'hashed_testpassword123',
+        first_name: testUser.first_name,
+        last_name: testUser.last_name,
+        avatar_url: testUser.avatar_url
+      })
+      .execute();
+
+    const result = await loginUser({
+      email: testUser.email,
+      password: 'wrongpassword'
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it('should verify demo user credentials correctly', async () => {
+    // Create demo user as seeding would
+    await db.insert(usersTable)
+      .values({
+        email: 'demo@example.com',
+        password_hash: 'hashed_password123',
+        first_name: 'Demo',
+        last_name: 'User',
+        avatar_url: null,
+        is_active: true,
+        current_streak: 0,
+        longest_streak: 0
+      })
+      .execute();
+
+    // Should succeed with correct password
+    const successResult = await loginUser({
+      email: 'demo@example.com',
+      password: 'password123' // matches 'hashed_password123' after removing 'hashed_'
+    });
+
+    expect(successResult).not.toBeNull();
+    expect(successResult!.email).toEqual('demo@example.com');
+    expect(successResult!.first_name).toEqual('Demo');
+
+    // Should fail with incorrect password
+    const failResult = await loginUser({
+      email: 'demo@example.com',
+      password: 'wrongpassword'
+    });
+
+    expect(failResult).toBeNull();
+  });
+
   it('should return null for non-existent email', async () => {
     const result = await loginUser({
       email: 'nonexistent@example.com',
@@ -65,7 +119,7 @@ describe('loginUser', () => {
     const insertResult = await db.insert(usersTable)
       .values({
         email: testUser.email,
-        password_hash: 'hashed_password',
+        password_hash: 'hashed_testpassword123', // Use correct demo hash format
         first_name: testUser.first_name,
         last_name: testUser.last_name,
         avatar_url: testUser.avatar_url,
@@ -100,7 +154,7 @@ describe('loginUser', () => {
     const insertResult = await db.insert(usersTable)
       .values({
         email: testUser.email,
-        password_hash: 'hashed_password',
+        password_hash: 'hashed_testpassword123', // Use correct demo hash format
         first_name: testUser.first_name,
         last_name: testUser.last_name,
         avatar_url: testUser.avatar_url
@@ -126,7 +180,7 @@ describe('loginUser', () => {
     await db.insert(usersTable)
       .values({
         email: testUser.email,
-        password_hash: 'hashed_password',
+        password_hash: 'hashed_testpassword123', // Use correct demo hash format
         first_name: testUser.first_name,
         last_name: testUser.last_name,
         avatar_url: testUser.avatar_url,
