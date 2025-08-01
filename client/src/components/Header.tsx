@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import type { User } from '../../../server/src/schema';
 
-type AppView = 'login' | 'dashboard' | 'courses' | 'course' | 'lesson';
+type AppView = 'landing' | 'login' | 'register' | 'dashboard' | 'courses' | 'course' | 'lesson';
 
 interface HeaderProps {
   user: User;

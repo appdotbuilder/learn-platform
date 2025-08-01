@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import type { User, Course, UserEnrollment, UserProgress } from '../../server/src/schema';
 
-type AppView = 'login' | 'dashboard' | 'courses' | 'course' | 'lesson';
+type AppView = 'landing' | 'login' | 'register' | 'dashboard' | 'courses' | 'course' | 'lesson';
 
 interface AppState {
   currentView: AppView;
@@ -22,7 +22,7 @@ interface AppState {
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
-  const [appState, setAppState] = useState<AppState>({ currentView: 'login' });
+  const [appState, setAppState] = useState<AppState>({ currentView: 'landing' });
   const [courses, setCourses] = useState<Course[]>([]);
   const [enrollments, setEnrollments] = useState<UserEnrollment[]>([]);
   const [userProgress, setUserProgress] = useState<UserProgress[]>([]);
@@ -78,7 +78,7 @@ function App() {
 
   const handleLogout = () => {
     setUser(null);
-    setAppState({ currentView: 'login' });
+    setAppState({ currentView: 'landing' });
     setCourses([]);
     setEnrollments([]);
     setUserProgress([]);
@@ -146,7 +146,85 @@ function App() {
             <h1 className="text-4xl font-bold text-gray-900 mb-2">🎓 LearnHub</h1>
             <p className="text-gray-600">Your journey to mastery starts here</p>
           </div>
-          <LoginForm onLogin={handleLogin} isLoading={isLoading} />
+          
+          {appState.currentView === 'landing' && (
+            <Card className="shadow-lg">
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-2xl text-gray-900">Welcome to LearnHub</CardTitle>
+                <CardDescription className="text-lg">
+                  Discover courses, track your progress, and achieve your learning goals.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button 
+                  onClick={() => setAppState({ currentView: 'login' })}
+                  className="w-full text-lg py-3"
+                  size="lg"
+                >
+                  Login
+                </Button>
+                <Button 
+                  onClick={() => setAppState({ currentView: 'register' })}
+                  variant="outline"
+                  className="w-full text-lg py-3"
+                  size="lg"
+                >
+                  Register
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {appState.currentView === 'login' && (
+            <div>
+              <div className="flex items-center justify-center mb-6">
+                <Button
+                  variant="ghost"
+                  onClick={() => setAppState({ currentView: 'landing' })}
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  ← Back
+                </Button>
+              </div>
+              <LoginForm onLogin={handleLogin} isLoading={isLoading} />
+            </div>
+          )}
+
+          {appState.currentView === 'register' && (
+            <Card className="shadow-lg">
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-2xl text-gray-900">Registration</CardTitle>
+                <CardDescription>
+                  Create your account to start learning
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 text-center">
+                <div className="py-8">
+                  <div className="text-6xl mb-4">🚧</div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Registration Coming Soon!</h3>
+                  <p className="text-gray-600 mb-6">
+                    We're working hard to bring you the registration feature. 
+                    In the meantime, you can sign in if you already have an account.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <Button 
+                    onClick={() => setAppState({ currentView: 'login' })}
+                    className="w-full"
+                  >
+                    Go to Login
+                  </Button>
+                  <Button 
+                    onClick={() => setAppState({ currentView: 'landing' })}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Back to Home
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     );
