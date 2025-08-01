@@ -1,11 +1,12 @@
 
+import { db } from '../db';
+import { coursesTable } from '../db/schema';
 import { type CreateCourseInput, type Course } from '../schema';
 
 export const createCourse = async (input: CreateCourseInput): Promise<Course> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is creating a new course and persisting it in the database.
-    return Promise.resolve({
-        id: 0, // Placeholder ID
+  try {
+    const result = await db.insert(coursesTable)
+      .values({
         title: input.title,
         description: input.description,
         slug: input.slug,
@@ -14,8 +15,14 @@ export const createCourse = async (input: CreateCourseInput): Promise<Course> =>
         estimated_duration: input.estimated_duration,
         is_published: false, // Default to unpublished
         category: input.category,
-        created_at: new Date(),
-        updated_at: new Date(),
         order_index: input.order_index
-    } as Course);
+      })
+      .returning()
+      .execute();
+
+    return result[0];
+  } catch (error) {
+    console.error('Course creation failed:', error);
+    throw error;
+  }
 };

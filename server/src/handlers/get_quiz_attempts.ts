@@ -1,20 +1,28 @@
 
+import { db } from '../db';
+import { quizAttemptsTable } from '../db/schema';
 import { type QuizAttempt } from '../schema';
+import { eq, and, desc } from 'drizzle-orm';
 
 export const getQuizAttempts = async (userId: number, quizId?: number): Promise<QuizAttempt[]> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching quiz attempts for a user,
-    // optionally filtered by a specific quiz.
-    return Promise.resolve([
-        {
-            id: 1,
-            user_id: userId,
-            quiz_id: quizId || 1,
-            answers: JSON.stringify({ question1: 'A', question2: 'B' }),
-            score: 85,
-            is_passed: true,
-            attempted_at: new Date(),
-            completed_at: new Date()
-        }
-    ] as QuizAttempt[]);
+  try {
+    // Build conditions array
+    const conditions = [eq(quizAttemptsTable.user_id, userId)];
+    
+    if (quizId !== undefined) {
+      conditions.push(eq(quizAttemptsTable.quiz_id, quizId));
+    }
+
+    // Build and execute query in one chain
+    const results = await db.select()
+      .from(quizAttemptsTable)
+      .where(conditions.length === 1 ? conditions[0] : and(...conditions))
+      .orderBy(desc(quizAttemptsTable.attempted_at))
+      .execute();
+
+    return results;
+  } catch (error) {
+    console.error('Failed to get quiz attempts:', error);
+    throw error;
+  }
 };

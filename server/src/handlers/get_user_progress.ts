@@ -1,20 +1,37 @@
 
+import { db } from '../db';
+import { userProgressTable, lessonsTable } from '../db/schema';
 import { type UserProgress } from '../schema';
+import { eq, and } from 'drizzle-orm';
 
 export const getUserProgress = async (userId: number, courseId?: number): Promise<UserProgress[]> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching user progress for all lessons or
-    // lessons within a specific course if courseId is provided.
-    return Promise.resolve([
-        {
-            id: 1,
-            user_id: userId,
-            lesson_id: 1,
-            is_completed: true,
-            completed_at: new Date(),
-            watch_time: 450,
-            created_at: new Date(),
-            updated_at: new Date()
-        }
-    ] as UserProgress[]);
+  try {
+    if (courseId !== undefined) {
+      // Query with join to filter by course
+      const results = await db.select()
+        .from(userProgressTable)
+        .innerJoin(
+          lessonsTable,
+          eq(userProgressTable.lesson_id, lessonsTable.id)
+        )
+        .where(and(
+          eq(userProgressTable.user_id, userId),
+          eq(lessonsTable.course_id, courseId)
+        ))
+        .execute();
+
+      return results.map(result => result.user_progress);
+    } else {
+      // Simple query without join
+      const results = await db.select()
+        .from(userProgressTable)
+        .where(eq(userProgressTable.user_id, userId))
+        .execute();
+
+      return results;
+    }
+  } catch (error) {
+    console.error('Failed to get user progress:', error);
+    throw error;
+  }
 };
